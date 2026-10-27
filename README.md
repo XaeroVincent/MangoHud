@@ -1,2 +1,2 @@
 # MangoHud for FreeBSD
-WIP FreeBSD Manoghud patches
+WIP FreeBSD MangoHud patches
