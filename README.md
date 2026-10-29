@@ -6,12 +6,13 @@ Reading CPU wattage information requires the cpuctl kernel module to be loaded a
 
 In **/etc/devfs.rules** add:
 
-```[localrules=5]
-add path 'cpuctl*' mode 0640 group cpuctl```
-
+```
+[localrules=5]
+add path 'cpuctl*' mode 0640 group cpuctl
+```
 Then:
-
-```pw groupadd cpuctl
+```
+pw groupadd cpuctl
 pw groupmod cpuctl -m yourusername
 sysrc devfs_system_ruleset="localrules"
 service devfs restart```
