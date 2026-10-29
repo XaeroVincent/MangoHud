@@ -15,4 +15,5 @@ Then:
 pw groupadd cpuctl
 pw groupmod cpuctl -m yourusername
 sysrc devfs_system_ruleset="localrules"
-service devfs restart```
+service devfs restart
+```
