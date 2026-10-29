@@ -17,3 +17,4 @@ pw groupmod cpuctl -m yourusername
 sysrc devfs_system_ruleset="localrules"
 service devfs restart
 ```
+Finally, log out of your user account then back in again.
