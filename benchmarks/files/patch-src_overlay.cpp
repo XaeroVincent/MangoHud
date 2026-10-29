@@ -18,7 +18,7 @@
           cpuStats.UpdateCoreMhz();
        if (params.enabled[OVERLAY_PARAM_ENABLED_cpu_temp] || logger->is_active() || params.enabled[OVERLAY_PARAM_ENABLED_graphs])
           cpuStats.UpdateCpuTemp();
-+#ifdef __linux__
++#if defined(__linux__) || defined(__FreeBSD__)
        if (params.enabled[OVERLAY_PARAM_ENABLED_cpu_power])
           cpuStats.UpdateCpuPower();
  #endif
@@ -62,7 +62,7 @@
     currentLogData.ram_used = memused;
  #endif
  
-@@ -646,14 +648,19 @@
+@@ -646,14 +648,20 @@
  
  void init_cpu_stats(overlay_params& params)
  {
@@ -78,12 +78,13 @@
 +#elif defined(__FreeBSD__)
 +   enabled[OVERLAY_PARAM_ENABLED_cpu_temp] = cpuStats.GetCpuFile()
 +                           && enabled[OVERLAY_PARAM_ENABLED_cpu_temp];
-+   // No unprivileged CPU power interface on FreeBSD (RAPL/MSRs need cpuctl + root)
-+   enabled[OVERLAY_PARAM_ENABLED_cpu_power] = false;
++   // Package power via the RAPL energy MSR through cpuctl(4); only opened when requested
++   enabled[OVERLAY_PARAM_ENABLED_cpu_power] = enabled[OVERLAY_PARAM_ENABLED_cpu_power]
++                           && cpuStats.InitCpuPowerData();
  #endif
  }
  
-@@ -803,27 +810,97 @@
+@@ -803,27 +811,97 @@
           params.enabled[OVERLAY_PARAM_ENABLED_gpu_stats] = false;
        }
     }
@@ -192,7 +193,7 @@
  
        const char* mangohud_recursion = getenv("MANGOHUD_RECURSION");
        if (!mangohud_recursion) {
-@@ -835,53 +912,9 @@
+@@ -835,53 +913,9 @@
           driver = "MangoHud glxinfo recursion detected";
        }
  
@@ -248,7 +249,7 @@
        // check for gamemode and vkbasalt
        fs::path path("/proc/self/map_files/");
        for (auto& p : fs::directory_iterator(path)) {
-@@ -894,6 +927,7 @@
+@@ -894,6 +928,7 @@
           if (HUDElements.gamemode_bol && HUDElements.vkbasalt_bol)
              break;
        }
@@ -256,7 +257,7 @@
  
        if (ld_preload)
           setenv("LD_PRELOAD", ld_preload, 1);
-@@ -904,7 +938,6 @@
+@@ -904,7 +939,6 @@
        SPDLOG_DEBUG("Os:{}", os);
        SPDLOG_DEBUG("Driver:{}", driver);
        SPDLOG_DEBUG("CPU Scheduler:{}", cpusched);
@@ -264,7 +265,7 @@
  }
  
  std::string get_device_name(uint32_t vendorID, uint32_t deviceID)
-@@ -928,6 +961,7 @@
+@@ -928,6 +962,7 @@
  }
  
  void update_fan(){
@@ -272,7 +273,7 @@
     // This just handles steam deck fan for now
     static bool init;
     string hwmon_path;
-@@ -948,6 +982,7 @@
+@@ -948,6 +983,7 @@
        fan_speed = stoi(read_line(hwmon_path));
     else
        fan_speed = -1;
